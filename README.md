@@ -1,6 +1,7 @@
 # LilAlphaSign
 Little experiment at a WiFi connected RGB sign.
-Background and "alert" animations can be triggered through HTTP requests
+Background and "alert" animations can be triggered through HTTP requests.
+User Manual: [here](extras/LilAlphaSign%20User%20Manual.pdf)
 
 ### Web interface
 
