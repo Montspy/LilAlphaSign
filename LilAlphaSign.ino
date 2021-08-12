@@ -1,3 +1,11 @@
+/***
+ * Board: NodeMCU 1.0 (ESP-12E)
+ * Speed: 160MHz
+ * Libraries: see Application.h file
+ * Additional: 
+ *     + Upload files config.json to LittleFS after full flash erase (https://arduino-esp8266.readthedocs.io/en/3.0.2/filesystem.html#uploading-files-to-file-system)
+ */
+
 #include "Application.h"
 #include "Animation.h"
 #include "Background.h"
