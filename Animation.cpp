@@ -187,7 +187,7 @@ void IntroAnimation::animate(CRGB* leds) {
 
   // Add jets sweep
   if(frame > this->frameOffset[2] + 34 + 50) {
-    uint8_t jetLength = map(constrain(frame - (this->frameOffset[2] + 34 + 50), 0, 20), 0, 15, 0, 3);
+    uint8_t jetLength = map(constrain(frame - (this->frameOffset[2] + 34 + 50), 0, 15), 0, 15, 0, 3);
     fill_solid(&leds[3-jetLength], jetLength, dimmedColor);
   }
 
