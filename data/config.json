@@ -2,13 +2,13 @@
   "alert_sweep_speed": 100,
   "alert_fill_speed": 100,
   "alert_flash_speed": 100,
-  "alert_intro_color": 16777215,
+  "alert_intro_color": 16711680,
   "alert_intro_glitchy": false,
-  "bg_rainbow_speed": 100,
+  "bg_rainbow_speed": 50,
   "bg_cycle_speed": 100,
-  "bg_color_color": 10872506,
+  "bg_color_color": 16711680,
   "bg_beat_speed": 100,
-  "bg_beat_color": 3540328,
-  "bg_default": "beat",
+  "bg_beat_color": 16711680,
+  "bg_default": "rainbow",
   "leds_on": true
 }

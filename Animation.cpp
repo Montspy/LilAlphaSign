@@ -124,23 +124,23 @@ void SweepAnimation::animate(CRGB* leds) {
 }
 
 void FillAnimation::animate(CRGB* leds) {
-  // 1 fill per animation (progress goes from 0 to NUM_LEDS*256*2 = 28672)
-  // ease in-out fill for 50% of the time (0 to 14335)
-  // then, brightness ramp for 25% of the time (14336 to 21504)
+  // 1 fill per animation (progress goes from 0 to maxProgress = NUM_LEDS*256*2)
+  // ease in-out fill for 50% of the time (0 to halfProgress)
+  // then, brightness ramp up from 75% to 100% of the time (14336 to threeQuarterProgress)
 
-  uint16_t progress = min((uint64_t)28672, (uint64_t)28672 * this->animTimer->getElapsed() / this->animTimer->getPeriod());
+  uint16_t progress = min((uint64_t)maxProgress, (uint64_t)maxProgress * this->animTimer->getElapsed() / this->animTimer->getPeriod());
   
   uint8_t numFilled = NUM_LEDS;
   uint8_t lastFill = 255;
-  if(progress < 14336) {
+  if(progress < halfProgress) {
     numFilled = progress >> 8;
     lastFill = progress - (numFilled << 8);
   }
 
   uint8_t brightness = 192;
-  if((progress >= 14336) && (progress < 21504))
-    brightness = map(progress, 14336, 21504, 192, ANIM_BRIGHTNESS);
-  else if(progress >= 21504)
+  if((progress >= halfProgress) && (progress < threeQuarterProgress))
+    brightness = map(progress, halfProgress, threeQuarterProgress, 192, ANIM_BRIGHTNESS);
+  else if(progress >= threeQuarterProgress)
     brightness = ANIM_BRIGHTNESS;
 
   CRGB dimmedColor = this->color;
@@ -172,9 +172,9 @@ void IntroAnimation::animate(CRGB* leds) {
 
   // 1.5s brightness ramps
   uint8_t brightness = 192;
-  if((frame > this->frameOffsetInner[2] + 34) && (frame <= this->frameOffsetInner[2] + 34 + 90))
-    brightness = map(frame - (this->frameOffsetInner[2] + 34), 0, 90, 192, ANIM_BRIGHTNESS);
-  if(frame > this->frameOffsetInner[2] + 34 + 90)
+  if((frame > this->frameOffset[2] + 34) && (frame <= this->frameOffset[2] + 34 + 90))
+    brightness = map(frame - (this->frameOffset[2] + 34), 0, 90, 192, ANIM_BRIGHTNESS);
+  if(frame > this->frameOffset[2] + 34 + 90)
     brightness = ANIM_BRIGHTNESS;
   
   // Add sweeps
@@ -184,6 +184,12 @@ void IntroAnimation::animate(CRGB* leds) {
   dimmedColor = this->color;
   dimmedColor.nscale8(dim8_raw(scale8(brightness, 255)));
   this->addSweep(leds, max((int)0, (int)frame - 20), dimmedColor);
+
+  // Add jets sweep
+  if(frame > this->frameOffset[2] + 34 + 50) {
+    uint8_t jetLength = map(constrain(frame - (this->frameOffset[2] + 34 + 50), 0, 20), 0, 15, 0, 3);
+    fill_solid(&leds[3-jetLength], jetLength, dimmedColor);
+  }
 
   if(this->glitchy) {
     // Add prism blur
@@ -198,24 +204,13 @@ void IntroAnimation::addSweep(CRGB* leds, uint8_t frame, CRGB dimmedColor) {
   uint8_t sweepEnd, sweepBegin;
   
   // Inner sweep #1
-  sweepEnd   = 28 + this->sweepLut_1[ constrain(frame - this->frameOffsetInner[0], 0, 33) ];
-  sweepBegin = 28 + this->sweepLut_1[ constrain(frame - this->frameOffsetInner[1], 0, 33) ];
-  fill_solid(&leds[sweepBegin], sweepEnd - sweepBegin, dimmedColor);
+  sweepEnd   = NUM_LEDS - this->sweepLut_1[ constrain(frame - this->frameOffset[0], 0, 33) ];
+  sweepBegin = NUM_LEDS - this->sweepLut_1[ constrain(frame - this->frameOffset[1], 0, 33) ];
+  fill_solid(&leds[sweepEnd], sweepBegin - sweepEnd, dimmedColor);
 
   // Inner sweep #2
-  sweepEnd   = 28 + this->sweepLut_1[ constrain(frame - this->frameOffsetInner[2], 0, 33) ];
-  sweepBegin = 28 + this->sweepLut_1[ constrain(frame - this->frameOffsetInner[3], 0, 33) ];
-  fill_solid(&leds[sweepBegin], sweepEnd - sweepBegin, dimmedColor);
-  
-  
-  // Outer sweep #1
-  sweepEnd   = 28 - this->sweepLut_1[ constrain(frame - this->frameOffsetOuter[0], 0, 33) ];
-  sweepBegin = 28 - this->sweepLut_1[ constrain(frame - this->frameOffsetOuter[1], 0, 33) ];
-  fill_solid(&leds[sweepEnd], sweepBegin - sweepEnd, dimmedColor);
-  
-  // Outer sweep #2
-  sweepEnd   = 28 - this->sweepLut_1[ constrain(frame - this->frameOffsetOuter[2], 0, 33) ];
-  sweepBegin = 28 - this->sweepLut_1[ constrain(frame - this->frameOffsetOuter[3], 0, 33) ];
+  sweepEnd   = NUM_LEDS - this->sweepLut_1[ constrain(frame - this->frameOffset[2], 0, 33) ];
+  sweepBegin = NUM_LEDS - this->sweepLut_1[ constrain(frame - this->frameOffset[3], 0, 33) ];
   fill_solid(&leds[sweepEnd], sweepBegin - sweepEnd, dimmedColor);
 }
 
@@ -225,9 +220,9 @@ void IntroAnimation::addPrismBlur(CRGB* leds, uint8_t frame, uint8_t glitchChanc
   int8_t shift = inoise8(0x8000 + ((uint16_t)frame) << 3) >> 7;
   
   bool timeForEffect = false;
-  if((frame > this->frameOffsetInner[0]) && (frame <= this->frameOffsetInner[2] + 34))
+  if((frame > this->frameOffset[0]) && (frame <= this->frameOffset[2] + 34))
     timeForEffect = inoise8(0x4000 + ((uint16_t)frame) << 5) < glitchChance;
-//  else if((frame > this->frameOffsetInner[3] - 34))
+//  else if((frame > this->frameOffset[3] - 34))
 //    timeForEffect = inoise8(0x4000 + ((uint16_t)frame) << 5) < glitchChance;
   
   if(timeForEffect) {
@@ -270,9 +265,9 @@ void IntroAnimation::addGlitch(CRGB* leds, uint8_t frame, uint8_t glitchChance) 
   static uint8_t cnt = 0;
 
   bool timeForEffect = 0;
-//  if((frame > this->frameOffsetInner[0]) && (frame <= this->frameOffsetInner[2] + 34))
+//  if((frame > this->frameOffset[0]) && (frame <= this->frameOffset[2] + 34))
 //    timeForEffect = true;
-  if((frame > this->frameOffsetInner[3]) && (frame <= this->frameOffsetInner[3] + 34))
+  if((frame > this->frameOffset[3]) && (frame <= this->frameOffset[3] + 34))
     timeForEffect = true;
   
   if(timeForEffect && ((cnt < frame) || (cnt > frame + 10))) { // Previous glitch expired

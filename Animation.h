@@ -66,6 +66,9 @@ class SweepAnimation: public Animation {
 };
 
 class FillAnimation: public Animation {
+  const uint64_t maxProgress = NUM_LEDS * 256 * 2;
+  const uint64_t halfProgress = (NUM_LEDS * 256 * 2) >> 1;
+  const uint64_t threeQuarterProgress = 3 * ((NUM_LEDS * 256 * 2) >> 2);
   public:
     FillAnimation(uint32_t total_ms = 3250, CRGB color = CRGB::White, uint32_t easein_ms = 200, uint32_t easeout_ms = 500)
       : Animation(total_ms, easein_ms, easeout_ms)
@@ -101,11 +104,10 @@ class IntroAnimation: public Animation {
     void addPrismBlur(CRGB* leds, uint8_t frame, uint8_t glitchChance = 80);
 
     // Frame to pixel index LUT: At frame i, pixel index sweepLut_1[i] is at the edge of the transition
-    uint8_t sweepLut_1[34] = {0, 0, 1, 1, 2, 4, 5, 7, 8, 10, 12, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 23, 23, 24, 25, 25, 26, 26, 27, 27, 27, 28, 28, 28}; // Cubic, 1/3
+    uint8_t sweepLut_1[34] = {0, 0, 0, 1, 1, 2, 2, 3, 4, 5, 6, 8, 9, 11, 12, 14, 16, 18, 20, 22, 23, 25, 26, 28, 29, 30, 31, 32, 32, 33, 33, 34, 34, 34}; // Quad
 
-    // Frame offset for sweep start (2 sweeps per arc, 4 transitions: in1, out1, in2, out2)
-    fract8 frameOffsetInner[4] = {12, 28, 42, 171};
-    fract8 frameOffsetOuter[4] = {12, 36, 40, 191};
+    // Frame offset for sweep start (4 transitions: in1, out1, in2, out2)
+    fract8 frameOffset[4] = {12, 28, 32, 171};
 
     CRGB color;
 };
