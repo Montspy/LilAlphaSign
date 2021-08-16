@@ -1,9 +1,8 @@
 /***
- * Board: NodeMCU 1.0 (ESP-12E)
- * Speed: 160MHz
+ * Board: NodeMCU 32S (ESP-WROOM-32)
  * Libraries: see Application.h file
  * Additional: 
- *     + Upload files config.json to LittleFS after full flash erase (https://arduino-esp8266.readthedocs.io/en/3.0.2/filesystem.html#uploading-files-to-file-system)
+ *     + Upload files data/config.json to LittleFS after full flash erase (https://github.com/lorol/arduino-esp32fs-plugin#installation), you may need to upgrade to esptool v3.1 (https://github.com/espressif/esptool/releases/tag/v3.1)
  */
 
 #include "Application.h"
@@ -18,7 +17,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-ESP8266WebServer server;
+WebServer server;
 
 FASTLED_USING_NAMESPACE
 CRGB aLeds[NUM_LEDS];
@@ -37,7 +36,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 
-  if (!LittleFS.begin()) {
+  if (!LITTLEFS.begin()) {
     Serial.println("Failed to mount file system");
     return;
   }
@@ -46,29 +45,27 @@ void setup() {
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
-  //reset settings - for testing
-  //wifiManager.resetSettings();
 
   //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wifiManager.setAPCallback(configModeCallback);
 
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
-  //here  "AutoConnectAP"
   //and goes into a blocking loop awaiting configuration
   if(!wifiManager.autoConnect(AP_NAME)) {
     Serial.println("failed to connect and hit timeout");
     //reset and try again, or maybe put it to deep sleep
-    ESP.reset();
+    ESP.restart();
     delay(1000);
   } 
 
-  //if you get here you have connected to the WiFi
+  // if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
   
   Serial.print("Local IP: ");
   Serial.println(WiFi.localIP());
-  if(MDNS.begin("esp8266", WiFi.localIP()))
+  
+  if(MDNS.begin("samw-sign"))
     Serial.println("MDNS Responder Started!");
 
   // tell FastLED about the LED strip configuration
@@ -77,18 +74,15 @@ void setup() {
 
   // set master brightness control
   FastLED.setBrightness(STRIP_BRIGHTNESS);
-  
+
+  // start serving HTTP requests
   server.begin();
 
+  // clear led buffer arrays
   fill_solid(aLeds, NUM_LEDS, 0x000000);
   fill_solid(bLeds, NUM_LEDS, 0x000000);
   fill_solid(outLeds, NUM_LEDS, 0x000000);
-
-//  currBg = new OffBackground();
-//  currBg = new ColorBackground(CRGB::White);
-//  currBg = new BeatBackground(CRGB::Purple);
-//  currBg = new RainbowBackground(false);
-//  currBg = new CycleBackground();
+  
   ctrl.initBg();
 }
 

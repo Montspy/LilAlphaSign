@@ -1,7 +1,7 @@
 
 #include "Controller.h"
 
-Controller::Controller(ESP8266WebServer* server,  Animation** pCurrAnim, Background** pCurrBg) : server(server), pCurrAnim(pCurrAnim), pCurrBg(pCurrBg) {
+Controller::Controller(WebServer* server,  Animation** pCurrAnim, Background** pCurrBg) : server(server), pCurrAnim(pCurrAnim), pCurrBg(pCurrBg) {
   this->setupHandlers();
 }
 
@@ -529,7 +529,7 @@ void Controller::handleOn() {
 }
 
 bool Controller::loadConfig() {
-  File configFile = LittleFS.open("/config.json", "r");
+  File configFile = LITTLEFS.open("/config.json", "r");
   if (!configFile) {
     Serial.println("Failed to open config file");
     return false;
@@ -596,7 +596,7 @@ bool Controller::saveConfig() {
   doc["bg_beat_color"] = this->cfg.bg_beat_color;
   doc["bg_default"] = this->cfg.bg_default;
 
-  File configFile = LittleFS.open("/config.json", "w");
+  File configFile = LITTLEFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println("Failed to open config file for writing");
     return false;

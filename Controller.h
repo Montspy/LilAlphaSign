@@ -29,7 +29,7 @@ struct Config {
 
 class Controller {
   public:
-    Controller(ESP8266WebServer* server, Animation** pCurrAnim, Background** pCurrBg);
+    Controller(WebServer* server, Animation** pCurrAnim, Background** pCurrBg);
 
     // LEDs
     bool getLedsOn();
@@ -73,7 +73,7 @@ class Controller {
     void startBackground(Background* newBg);
 
     // Wifi
-    ESP8266WebServer* server;
+    WebServer* server;
     void setupHandlers();
 
     // Settings
