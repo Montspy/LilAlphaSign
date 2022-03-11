@@ -48,6 +48,7 @@ void setup() {
 
   //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wifiManager.setAPCallback(configModeCallback);
+  wifiManager.setHostname(HOST_NAME);
 
   //fetches ssid and pass and tries to connect
   //if it does not connect it starts an access point with the specified name
