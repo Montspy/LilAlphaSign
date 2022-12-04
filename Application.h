@@ -17,8 +17,8 @@
 #include <LITTLEFS.h>             //https://github.com/lorol/LITTLEFS
 
 #define AP_NAME "Lil SamWSign"
-#define HOSTNAME "lil-samw-sign"
-#define VERSION "0.2.0"
+#define HOST_NAME "lil-samw-sign"
+#define VERSION "0.2.1"
 
 #define DATA_PIN    0
 #define LED_TYPE    WS2812B
