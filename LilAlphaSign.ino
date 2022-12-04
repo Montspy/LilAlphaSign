@@ -30,7 +30,7 @@ bool isOn = true;
 
 uint8_t gHue = 0;
 
-Controller ctrl(&server, &currAnim, &currBg);
+Controller ctrl(&server, &currAnim, &currBg, &WiFi);
 
 void setup() {
   // put your setup code here, to run once:
@@ -65,9 +65,6 @@ void setup() {
   
   Serial.print("Local IP: ");
   Serial.println(WiFi.localIP());
-  
-  if(MDNS.begin("samw-sign"))
-    Serial.println("MDNS Responder Started!");
 
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(outLeds, NUM_LEDS).setCorrection(TypicalLEDStrip);

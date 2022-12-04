@@ -29,7 +29,7 @@ struct Config {
 
 class Controller {
   public:
-    Controller(WebServer* server, Animation** pCurrAnim, Background** pCurrBg);
+    Controller(WebServer* server, Animation** pCurrAnim, Background** pCurrBg, WiFiClass* wifi);
 
     // LEDs
     bool getLedsOn();
@@ -47,6 +47,7 @@ class Controller {
     void saveSettingsBg();
     void handleOff();
     void handleOn();
+    void resetWifiSettings();
 
     // Settings
     bool loadConfig();
@@ -74,6 +75,7 @@ class Controller {
 
     // Wifi
     WebServer* server;
+    WiFiClass* wifi;
     void setupHandlers();
 
     // Settings

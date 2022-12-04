@@ -1,7 +1,7 @@
 
 #include "Controller.h"
 
-Controller::Controller(WebServer* server,  Animation** pCurrAnim, Background** pCurrBg) : server(server), pCurrAnim(pCurrAnim), pCurrBg(pCurrBg) {
+Controller::Controller(WebServer* server,  Animation** pCurrAnim, Background** pCurrBg, WiFiClass* wifi) : server(server), pCurrAnim(pCurrAnim), pCurrBg(pCurrBg), wifi(wifi) {
   this->setupHandlers();
 }
 
@@ -75,6 +75,7 @@ void Controller::setupHandlers() {
   this->server->on("/settings/bg",    HTTP_POST, [this](){ this->saveSettingsBg(); });
   this->server->on("/off",            [this](){ this->handleOff(); });
   this->server->on("/on",             [this](){ this->handleOn(); });
+  this->server->on("/reset-wifi",     [this](){ this->resetWifiSettings(); });
 }
 
 void Controller::handleRoot() {
@@ -526,6 +527,33 @@ void Controller::handleOn() {
   this->setLedsOn(true);
   this->server->sendHeader("Location", "settings", true);
   this->server->send(303, "text/plain", "");
+}
+
+void Controller::resetWifiSettings() {
+  Serial.println("resetWifiSettings()");
+  
+  // Headers
+  String page = FPSTR(HTTP_AGS_HEAD);
+  page.replace("{v}", "Reset WiFi settings");
+  page += FPSTR(HTTP_AGS_SCRIPT);
+  page += FPSTR(HTTP_AGS_STYLE);
+  page += FPSTR(HTTP_AGS_HEAD_END);
+
+  // Content
+  page += FPSTR(HTTP_AGS_TITLE);
+  page.replace("{t}", AP_NAME);
+  page += FPSTR(HTTP_AGS_WIFI_RESET);
+
+  // Footer
+  String stickyFooter = FPSTR(HTTP_AGS_FOOTER);
+  stickyFooter.replace("{v}", VERSION);
+  page += stickyFooter;
+  page += FPSTR(HTTP_AGS_END);
+
+  this->server->sendHeader("Content-Length", String(page.length()));
+  this->server->send(200, "text/html", page);
+  
+  this->wifi->disconnect(true,true);
 }
 
 bool Controller::loadConfig() {
