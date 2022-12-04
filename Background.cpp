@@ -45,7 +45,7 @@ void ColorBackground::animate(CRGB* leds) {
 }
 
 void BeatBackground::animate(CRGB* leds) {
-  uint8_t beat = beatsin8(this->bpm, 128, 255, this->millisStart, 64);
+  uint8_t beat = beatsin8(this->bpm, 96, 255, this->millisStart, 64);
   
   CRGB c(this->color);
   c.nscale8(beat); // Sinusoid beat, starting at highest brightness
